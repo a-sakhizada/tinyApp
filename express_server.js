@@ -29,6 +29,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//display a single URL and its shortened form
 app.get("/urls/:id", (req, res) => {
     const shortURL = req.params.id;
     const templateVars = { id: shortURL, longURL: urlDatabase[shortURL]};
