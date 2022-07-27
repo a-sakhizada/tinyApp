@@ -23,10 +23,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-//send urlDatabase data through tempalteVars to urls_index.ejs
+//send urlDatabase data through templateVars to urls_index.ejs
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/:id", (req, res) => {
+    const shortURL = req.params.id;
+    const templateVars = { id: shortURL, longURL: urlDatabase[shortURL]};
+    res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
