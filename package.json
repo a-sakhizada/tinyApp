@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/a-sakhizada/tinyApp/issues"
   },
-  "homepage": "https://github.com/a-sakhizada/tinyApp#readme"
+  "homepage": "https://github.com/a-sakhizada/tinyApp#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
 }
