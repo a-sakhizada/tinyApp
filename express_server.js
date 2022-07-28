@@ -73,6 +73,13 @@ app.get("/u/:id", (req, res) => {
     res.redirect(longURL);
 });
 
+//using a POST to delete a URL resource from the urlDB
+app.post("/urls/:id/delete", (req, res) => {
+    const shortURL = req.params.id;
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
