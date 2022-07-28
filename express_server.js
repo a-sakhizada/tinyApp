@@ -50,8 +50,15 @@ app.get("/urls/new", (req, res) => {
 
 //receiving a new longURL and adding it to the urlDatabase
 app.post("/urls", (req, res) => {
-  console.log(req.body); //log the POST request body to the console
-  res.send("ok"); //respond with ok for now (temporary)
+  //console.log(req.body); //log the POST request body to the console
+
+  //generate a random shortURL id
+  const shortURL = generateRandomString();
+
+  //add it to our urlDatabase
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+  //res.send("ok"); //respond with ok for now (temporary)
 });
 
 //display a single URL and its shortened form
