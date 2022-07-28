@@ -5,23 +5,37 @@ const PORT = 8080; //default port 8080
 //set ejs as the view engine
 app.set("view engine", "ejs");
 
+//express middleware that translates/parses incoming (req.body) of a POST/PUT request
+app.use(express.urlencoded({ extended: true }));
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
+  b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "https://www.google.com",
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+function generateRandomString() {
+  const result = "";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+  for (let i = 0; i < chars.length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length()));
+  }
+  return result;
+}
 
-//sending HTML (rendered on client)
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/", (req, res) => {
+//   res.send("Hello!");
+// });
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
+
+// //sending HTML (rendered on client)
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 //send urlDatabase data through templateVars to urls_index.ejs
 app.get("/urls", (req, res) => {
@@ -29,11 +43,22 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//render the urls_new.ejs template to present the form to the user
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+//receiving a new longURL and adding it to the urlDatabase
+app.post("/urls", (req, res) => {
+  console.log(req.body); //log the POST request body to the console
+  res.send("ok"); //respond with ok for now (temporary)
+});
+
 //display a single URL and its shortened form
 app.get("/urls/:id", (req, res) => {
-    const shortURL = req.params.id;
-    const templateVars = { id: shortURL, longURL: urlDatabase[shortURL]};
-    res.render("urls_show", templateVars);
+  const shortURL = req.params.id;
+  const templateVars = { id: shortURL, longURL: urlDatabase[shortURL] };
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
