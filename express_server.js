@@ -14,12 +14,10 @@ const urlDatabase = {
 };
 
 function generateRandomString() {
-  const result = "";
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (let i = 0; i < chars.length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length()));
+  let result = "";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
 }
@@ -66,6 +64,13 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const templateVars = { id: shortURL, longURL: urlDatabase[shortURL] };
   res.render("urls_show", templateVars);
+});
+
+//redirects to its associated longURL directly
+app.get("/u/:id", (req, res) => {
+    const shortURL = urlDatabase[req.params.id];
+    const longURL = shortURL;
+    res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
