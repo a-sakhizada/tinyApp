@@ -80,6 +80,14 @@ app.post("/urls/:id/delete", (req, res) => {
     res.redirect("/urls");
 });
 
+//update your longURL in the urlDB then redirect to /urls
+app.post("/urls/:id", (req, res) => {
+    const shortURL = req.params.id;
+    const newLongURL = req.body.newURL;
+    urlDatabase[shortURL] = newLongURL;
+    res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
