@@ -78,12 +78,22 @@ app.get("/urls", (req, res) => {
 //render the urls_new.ejs template to present the form to the user
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: req.cookies["user_id"] };
+
+  //if user is not logged in, redirect to /login
+  if (!templateVars.user) {
+    res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 
 //receiving a new longURL and adding it to the urlDatabase
 app.post("/urls", (req, res) => {
-  //console.log(req.body); //log the POST request body to the console
+  const user = req.cookies["user_id"];
+
+  //if user isn't logged in
+  if (!user) {
+    res.send("<html>body><b>Login to see all URLS!</b></body></html>\n");
+  }
 
   //generate a random shortURL id
   const shortURL = generateRandomString();
