@@ -54,13 +54,13 @@ function generateRandomString() {
 
 //send urlDatabase data through templateVars to urls_index.ejs
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, user: req.cookies["user_id"]};
   res.render("urls_index", templateVars);
 });
 
 //render the urls_new.ejs template to present the form to the user
 app.get("/urls/new", (req, res) => {
-    const templateVars = { username: req.cookies["username"]};
+    const templateVars = { user: req.cookies["user_id"]};
   res.render("urls_new", templateVars);
 });
 
@@ -80,7 +80,7 @@ app.post("/urls", (req, res) => {
 //display a single URL and its shortened form
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  const templateVars = { id: shortURL, longURL: urlDatabase[shortURL], username: req.cookies["username"]};
+  const templateVars = { id: shortURL, longURL: urlDatabase[shortURL], user: req.cookies["user_id"]};
   res.render("urls_show", templateVars);
 });
 
@@ -109,19 +109,19 @@ app.post("/urls/:id", (req, res) => {
 //login with the username cookie
 app.post("/login", (req, res) => {
     //set cookie(username) to the value submitted in the request body via login form
-    res.cookie("username", req.body.username);
+    res.cookie("user_id", req.body.username);
     res.redirect("/urls");
 });
 
 //clear username cookie and redirect to /urls
 app.post("/logout", (req, res) => {
-    res.clearCookie("username");
+    res.clearCookie("user_id");
     res.redirect("/urls");
 });
 
 //registration page
 app.get("/register", (req, res) => {
-    const templateVars = { username: req.cookies["username"]};
+    const templateVars = { user: req.cookies["user_id"]};
     res.render("register", templateVars);
 });
 
