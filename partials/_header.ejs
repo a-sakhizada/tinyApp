@@ -16,11 +16,11 @@
                 <label name="username" style="margin: 0.5em;">Logged in as: <%= user.email %> </label>
                 <button type="submit" class="btn btn-outline-dark">Logout</button>
             </form>
-        <% } else { %>
-            <form class="form-inline" method="POST" action="/login">
-                <input name="username" type="text" placeholder="username" style="height: 2.5em; margin: 0.5em; border-radius: 0.2em;"/>
-                <button type="submit" class="btn btn-outline-dark">Login</button>
-            </form>  
-        <% } %>
+            <% } else { %>
+                <span>
+                    <a type="submit" class="btn btn-outline-dark" href="/login" role="button">Login</a>
+                    <a type="submit" class="btn btn-outline-dark" href="/register" role="button">Register</a>
+                </span>
+                <% } %>
     </nav>
 </header>

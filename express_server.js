@@ -127,6 +127,12 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+//login page 
+app.get("/login", (req, res) => {
+    const templateVars = { user: req.cookies["user_id"] };
+    res.render("login", templateVars);
+});
+
 //login with the username cookie
 app.post("/login", (req, res) => {
   //set cookie(username) to the value submitted in the request body via login form
