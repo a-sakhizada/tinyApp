@@ -130,7 +130,13 @@ app.post("/urls/:id", (req, res) => {
 //login page
 app.get("/login", (req, res) => {
   const templateVars = { user: req.cookies["user_id"] };
-  res.render("login", templateVars);
+
+  //if user is already logged in
+  if (templateVars.user) {
+    res.redirect("/urls");
+  } else {
+    res.render("login", templateVars);
+  }
 });
 
 //login with the user_id cookie
@@ -166,7 +172,13 @@ app.post("/logout", (req, res) => {
 //registration page
 app.get("/register", (req, res) => {
   const templateVars = { user: req.cookies["user_id"] };
-  res.render("register", templateVars);
+
+  //if user is already logged in
+  if (templateVars.user) {
+    res.redirect("/urls");
+  } else {
+    res.render("register", templateVars);
+  }
 });
 
 //add a new user to the users object
