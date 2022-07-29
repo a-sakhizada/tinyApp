@@ -127,20 +127,37 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-//login page 
+//login page
 app.get("/login", (req, res) => {
-    const templateVars = { user: req.cookies["user_id"] };
-    res.render("login", templateVars);
+  const templateVars = { user: req.cookies["user_id"] };
+  res.render("login", templateVars);
 });
 
-//login with the username cookie
+//login with the user_id cookie
 app.post("/login", (req, res) => {
-  //set cookie(username) to the value submitted in the request body via login form
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
+  //set cookie(user_id) to the value submitted in the request body via login form
+  const email = req.body.email;
+  const password = req.body.password;
+  const emailExists = getUserByEmail(email);
+
+  //if user with that email exists
+  if (emailExists) {
+    const existingPassword = emailExists.password;
+
+    //compare passwords given in the form with existing users pass
+    if (existingPassword === password) {
+      const existingUserID = emailExists.id;
+      res.cookie("user_id", users[existingUserID]);
+      res.redirect("/urls");
+    } else {
+      res.status(403).send("Forbidden: Incorrect password! Try Again.");
+    }
+  } else {
+    res.status(403).send("Forbidden: User with that email does NOT exist!");
+  }
 });
 
-//clear username cookie and redirect to /urls
+//clear user_id cookie and redirect to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
@@ -154,7 +171,6 @@ app.get("/register", (req, res) => {
 
 //add a new user to the users object
 app.post("/register", (req, res) => {
-
   //if email/pass is empty, respond with 400
   if ((req.body.email === "") | (req.body.password === "")) {
     res.status(400).send("Bad Request: enter a valid email and password");
@@ -167,9 +183,9 @@ app.post("/register", (req, res) => {
     if (emailExists) {
       res.status(400).send("Bad Request: user account already exists!");
     } else {
-      const id = generateRandomString();
-      users[id] = { id, email, password };
-      res.cookie("user_id", users[id]);
+      const newUserId = generateRandomString();
+      users[newUserId] = { id: newUserId, email, password };
+      res.cookie("user_id", users[newUserId]);
       res.redirect("/urls");
     }
   }
