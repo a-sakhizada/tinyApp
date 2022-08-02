@@ -118,8 +118,16 @@ app.get("/urls/:id", (req, res) => {
 //redirects to its associated longURL directly
 app.get("/u/:id", (req, res) => {
   const shortURL = urlDatabase[req.params.id];
-  const longURL = shortURL;
-  res.redirect(longURL);
+
+  if(shortURL)
+  {
+    const longURL = shortURL;
+    res.redirect(longURL);
+  }
+  else
+  {
+    res.send("<html><body>this short URL doesn't exist</body></html>\n");
+  }
 });
 
 //using a POST to delete a URL resource from the urlDB
