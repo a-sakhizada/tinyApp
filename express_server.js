@@ -2,12 +2,13 @@ const express = require("express");
 const app = express();
 const PORT = 8080; //default port 8080
 const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
 
 //set ejs as the view engine
 app.set("view engine", "ejs");
 
 //express middleware that translates/parses incoming (req.body) of a POST/PUT request
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //express middleware reads values from the cookie.
 app.use(cookieParser());
@@ -17,8 +18,16 @@ const urlDatabase = {
     longURL: "http://www.lighthouselabs.ca",
     userID: "aJ48lW",
   },
-  "9sm5xK": {
+  Psm5xK: {
     longURL: "https://www.google.com",
+    userID: "aJ48lW",
+  },
+  Trp6uO: {
+    longURL: "http://www.hi.com",
+    userID: "user3RandomID",
+  },
+  Yvp4u5: {
+    longURL: "http://www.hello.com",
     userID: "aJ48lW",
   },
 };
@@ -38,6 +47,12 @@ const users = {
     id: "user3RandomID",
     email: "a@a.com",
     password: "aa",
+  },
+
+  aJ48lW: {
+    id: "aJ48lW",
+    email: "b@b.com",
+    password: "bb",
   },
 };
 
@@ -62,6 +77,28 @@ function getUserByEmail(email) {
   return user ? user : null;
 }
 
+function urlsForUser(id) {
+  //return urls where userid is the current id logged in
+  let myShortURLs = [];
+  let myLongURLs = [];
+  const vals = Object.values(urlDatabase);
+
+  myShortURLs = Object.keys(urlDatabase).filter(
+    (key) => urlDatabase[key].userID === id
+  );
+
+  for (let i = 0; i < vals.length; i++) {
+    //console.log(vals[i]);
+    if (id === vals[i].userID) {
+      //console.log(`longURLs for ${id}:`, vals[i].longURL);
+      myLongURLs.push(vals[i].longURL);
+    }
+  }
+  //console.log("myShortURLs: ", myShortURLs);
+  //console.log("myLongURLs: ", myLongURLs);
+  return { myShortURLs, myLongURLs };
+}
+
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
@@ -77,8 +114,21 @@ function getUserByEmail(email) {
 
 //send urlDatabase data through templateVars to urls_index.ejs
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.cookies["user_id"] };
-  res.render("urls_index", templateVars);
+  let templateVars = {};
+  const user = req.cookies["user_id"];
+  //console.log("after urDB:", urlDatabase);
+  if (!user) {
+    res.redirect("/login");
+  } else {
+    const urls = urlsForUser(user.id);
+
+    templateVars = {
+      shortURLs: urls.myShortURLs,
+      longURLs: urls.myLongURLs,
+      user: user,
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 //render the urls_new.ejs template to present the form to the user
@@ -105,20 +155,49 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
 
   //add it to our urlDatabase
-  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: user.id };
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: user.id };
 
   res.redirect(`/urls/${shortURL}`);
   //res.send("ok"); //respond with ok for now (temporary)
 });
 
-//display a single URL and its shortened form
+//display a single longURL and its shortened form
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  const templateVars = {
+  let templateVars = {
     id: shortURL,
-    longURL: urlDatabase[shortURL].longURL,
+    longURL: urlDatabase[shortURL].longURL && urlDatabase[shortURL],
     user: req.cookies["user_id"],
   };
+
+  //if user is not logged in
+  if (!templateVars.user) {
+    res.redirect("/login");
+  }
+
+  //if the shortURL requested does not belong to the current logged in user
+  if (templateVars.user.id !== urlDatabase[shortURL].userID) {
+    //if the shortURL doesnt even exist
+    console.log(
+      "shortURL exists: ",
+      Object.keys(urlDatabase).includes(shortURL)
+    );
+    if (!Object.keys(urlDatabase).includes(shortURL)) {
+      console.log("shortURL doesnt exist");
+      res
+        .status(400)
+        .send(
+          "<html><body>ShortURL doesnt exist and cant be deleted!!</body></html>\n"
+        );
+    } else {
+      console.log("short doesnt belong to you");
+      res
+        .status(400)
+        .send(
+          "<html><body>That shortURL does not belong to you! Try Again!!</body></html>"
+        );
+    }
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -137,6 +216,38 @@ app.get("/u/:id", (req, res) => {
 //using a POST to delete a URL resource from the urlDB
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
+  const user = req.cookies["user_id"];
+
+  //if user is not logged in
+  if (!user) {
+    res.redirect("/login");
+  }
+
+  //if the shortURL requested does not belong to the current logged in user
+  if (user.id !== urlDatabase[shortURL].userID) {
+    //if the shortURL doesnt even exist
+    console.log(
+      "shortURL exists: ",
+      Object.keys(urlDatabase).includes(shortURL)
+    );
+    if (!Object.keys(urlDatabase).includes(shortURL)) {
+      console.log("shortURL doesnt exist");
+      res
+        .status(400)
+        .send(
+          "<html><body>ShortURL doesnt exist and cant be deleted!!</body></html>\n"
+        );
+    } else {
+      console.log("short doesnt belong to you");
+      res
+        .status(400)
+        .send(
+          "<html><body>That shortURL does not belong to you! Try Again!!</body></html>"
+        );
+    }
+  }
+
+  console.log("good to go delete!");
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
@@ -145,7 +256,41 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const newLongURL = req.body.newURL;
-  urlDatabase[shortURL] = {longURL: newLongURL, userID: req.cookies["user_id"]};
+  const user = req.cookies["user_id"];
+
+  //if user is not logged in
+  if (!user) {
+    res.redirect("/login");
+  }
+
+  //if the shortURL requested does not belong to the current logged in user
+  if (user.id !== urlDatabase[shortURL].userID) {
+    //if the shortURL doesnt even exist
+    console.log(
+      "shortURL exists: ",
+      Object.keys(urlDatabase).includes(shortURL)
+    );
+    if (!Object.keys(urlDatabase).includes(shortURL)) {
+      console.log("shortURL doesnt exist");
+      res
+        .status(400)
+        .send(
+          "<html><body>ShortURL doesnt exist and cant be edited!!</body></html>\n"
+        );
+    } else {
+      console.log("short doesnt belong to you");
+      res
+        .status(400)
+        .send(
+          "<html><body>That shortURL does not belong to you! Try Again!!</body></html>"
+        );
+    }
+  }
+
+  urlDatabase[shortURL] = {
+    longURL: newLongURL,
+    userID: req.cookies["user_id"].id,
+  };
   res.redirect("/urls");
 });
 
