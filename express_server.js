@@ -88,7 +88,7 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   let templateVars = {
     id: shortURL,
-    longURL: urlDatabase[shortURL].longURL && urlDatabase[shortURL],
+    longURL: urlDatabase[shortURL].longURL,
     user: req.session["user_id"],
   };
 
