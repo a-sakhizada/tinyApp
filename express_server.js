@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; //default port 8080
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
 
 //set ejs as the view engine
 app.set("view engine", "ejs");
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //express middleware reads values from the cookie.
 app.use(cookieParser());
+
 
 const urlDatabase = {
   b2xVn2: {
@@ -52,7 +54,7 @@ const users = {
   aJ48lW: {
     id: "aJ48lW",
     email: "b@b.com",
-    password: "bb",
+    password: bcrypt.hashSync("2", 10),
   },
 };
 
@@ -311,14 +313,17 @@ app.post("/login", (req, res) => {
   //set cookie(user_id) to the value submitted in the request body via login form
   const email = req.body.email;
   const password = req.body.password;
+  //const hashedPassword = bcrypt.hashSync(password, 10);
   const emailExists = getUserByEmail(email);
+  console.log("pass: ", password);
 
   //if user with that email exists
   if (emailExists) {
     const existingPassword = emailExists.password;
+    console.log("existing pass: ", existingPassword);
 
     //compare passwords given in the form with existing users pass
-    if (existingPassword === password) {
+    if (bcrypt.compareSync(password, existingPassword)) {
       const existingUserID = emailExists.id;
       res.cookie("user_id", users[existingUserID]);
       res.redirect("/urls");
@@ -339,7 +344,7 @@ app.post("/logout", (req, res) => {
 //registration page
 app.get("/register", (req, res) => {
   const templateVars = { user: req.cookies["user_id"] };
-
+ 
   //if user is already logged in
   if (templateVars.user) {
     res.redirect("/urls");
@@ -355,15 +360,18 @@ app.post("/register", (req, res) => {
     res.status(400).send("Bad Request: enter a valid email and password");
   } else {
     const email = req.body.email;
-    const password = req.body.password;
 
     //if the email already exists, respond with 400
     const emailExists = getUserByEmail(email);
     if (emailExists) {
       res.status(400).send("Bad Request: user account already exists!");
     } else {
+      const password = req.body.password;
+      console.log("registered pass: ", password);
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      console.log("registered hashed pass: ", hashedPassword);
       const newUserId = generateRandomString();
-      users[newUserId] = { id: newUserId, email, password };
+      users[newUserId] = { id: newUserId, email, password: hashedPassword};
       res.cookie("user_id", users[newUserId]);
       res.redirect("/urls");
     }
